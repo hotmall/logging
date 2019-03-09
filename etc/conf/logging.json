@@ -1,0 +1,13 @@
+{
+    "root" : {
+        "rotate": {
+            "filename": "/var/log/foo.log",
+            "maxsize": 20,
+            "maxage": 7,
+            "maxbackups": 50,
+            "localtime": true,
+            "compress": true
+        },
+        "level": "info"
+    }
+}

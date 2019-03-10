@@ -51,7 +51,7 @@ func main() {
 		logger.Error("hello error", zap.String("key", "value"), zap.Int("age", 30))
 	}
 
-    proxyLogger : logging.Logger("proxy")
-	logger.Info("hello world", zap.String("key", "value"), zap.Int("age", 20))
+	proxyLogger := logging.RLogger("proxy") 
+	proxyLogger.Info("hello world", zap.String("key", "value"), zap.Int("age", 20))
 }
 ```

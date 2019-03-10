@@ -1,22 +1,35 @@
-package logging_test
+package logging
 
 import (
 	"testing"
 
-	"github.com/mallbook/logging"
+	. "gopkg.in/check.v1"
 )
 
-func TestRLogger(t *testing.T) {
-	logger, ok := logging.RLogger()
-	if !ok {
-		t.Error("Expect ok is true, but false")
-	}
-	logger.Info("Hello world")
+func TestLogger(t *testing.T) { TestingT(t) }
+
+type MySuite struct{}
+
+var _ = Suite(&MySuite{})
+
+func (s *MySuite) TestRLogger(c *C) {
+	_, ok := RLogger()
+	c.Check(ok, Equals, true)
+
+	_, ok = Logger("root")
+	c.Check(ok, Equals, true)
+
+	_, ok = Logger("ROOT")
+	c.Check(ok, Equals, false)
 }
 
-func TestLogger(t *testing.T) {
-	_, ok := logging.Logger("mylog")
-	if ok {
-		t.Error("Get mylog logger, expect return not ok, but return ok")
-	}
+func (s *MySuite) TestLogger(c *C) {
+	_, ok := Logger("mylog")
+	c.Check(ok, Equals, true)
+
+	_, ok = Logger("MYLOG")
+	c.Check(ok, Equals, false)
+
+	_, ok = Logger("mylog1")
+	c.Check(ok, Equals, false)
 }

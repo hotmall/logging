@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 
@@ -35,7 +37,13 @@ func init() {
 			fmt.Printf("Unmarshal level(%s) fail, err = %s", c.Level, err.Error())
 		}
 
-		c.Rotate.Filename = logPath + c.Rotate.Filename
+		// Set log filename
+		if strings.HasPrefix(c.Rotate.FileName, "/") {
+			c.Rotate.FileName = logPath + c.Rotate.FileName
+		} else {
+			c.Rotate.FileName = logPath + "/" + c.Rotate.FileName
+		}
+		c.Rotate.FileName = filepath.Clean(c.Rotate.FileName)
 
 		lumLogger := newLumLogger(c.Rotate)
 		w := zapcore.AddSync(lumLogger)
@@ -67,7 +75,7 @@ type rotateConfig struct {
 	// Filename is the file to write logs to.  Backup log files will be retained
 	// in the same directory.  It uses <processname>-lumberjack.log in
 	// os.TempDir() if empty.
-	Filename string `json:"filename" yaml:"filename"`
+	FileName string `json:"filename" yaml:"filename"`
 
 	// MaxSize is the maximum size in megabytes of the log file before it gets
 	// rotated. It defaults to 100 megabytes.
@@ -117,7 +125,7 @@ func loadConfig(fileName string) (conf config, err error) {
 
 func newLumLogger(c rotateConfig) *lumberjack.Logger {
 	return &lumberjack.Logger{
-		Filename:   c.Filename,
+		Filename:   c.FileName,
 		MaxSize:    c.MaxSize,
 		MaxAge:     c.MaxAge,
 		MaxBackups: c.MaxBackups,

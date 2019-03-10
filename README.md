@@ -29,7 +29,7 @@ Logging package based on zap and lumberjack
     }
 }
 ```
-Root and proxy are the names of the loggers from which you can get the logger instance.  
+The `root` and `proxy` are the names of the loggers from which you can get the logger instance.  
 
 The range of level is `debug`, `info`, `warn`, `error`, `dpanic`, `panic`, `fatal`, and the value is from low to high.  
 

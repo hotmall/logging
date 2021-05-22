@@ -4,8 +4,8 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/hotmall/commandline v0.0.0-20210429055210-0a4aec8a806b
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/mallbook/commandline v0.0.0-20190310040538-1064df47c5c9
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	go.uber.org/atomic v1.2.0 // indirect

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/mallbook/commandline"
+	"github.com/hotmall/commandline"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

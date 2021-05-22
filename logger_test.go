@@ -13,23 +13,20 @@ type MySuite struct{}
 var _ = Suite(&MySuite{})
 
 func (s *MySuite) TestRLogger(c *C) {
-	_, ok := RLogger()
-	c.Check(ok, Equals, true)
 
-	_, ok = Logger("root")
-	c.Check(ok, Equals, true)
-
-	_, ok = Logger("ROOT")
-	c.Check(ok, Equals, false)
+	l1 := Logger("root")
+	c.Assert(l1, NotNil)
+	l2 := Logger("ROOT")
+	c.Assert(l2, NotNil)
 }
 
 func (s *MySuite) TestLogger(c *C) {
-	_, ok := Logger("mylog")
-	c.Check(ok, Equals, true)
+	l1 := Logger("mylog")
+	c.Assert(l1, NotNil)
 
-	_, ok = Logger("MYLOG")
-	c.Check(ok, Equals, false)
+	l2 := Logger("MYLOG")
+	c.Assert(l2, NotNil)
 
-	_, ok = Logger("mylog1")
-	c.Check(ok, Equals, false)
+	l3 := Logger("mylog1")
+	c.Assert(l3, NotNil)
 }

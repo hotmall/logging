@@ -31,8 +31,6 @@ func init() {
 	configFile := prefix + "/etc/conf/logging.json"
 	config, err := loadConfig(configFile)
 	if err != nil {
-		// fmt.Printf("Load config file(%s) fail, err = %s", configFile, err.Error())
-		// os.Exit(1)
 		defaultLogger = initDefaultLogger()
 		return
 	}
@@ -60,16 +58,10 @@ func init() {
 			enc = zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		}
 
-		// Set log filename
-		// if strings.HasPrefix(c.Rotate.FileName, "/") {
-		// 	c.Rotate.FileName = logPath + c.Rotate.FileName
-		// } else {
-		// 	c.Rotate.FileName = logPath + "/" + c.Rotate.FileName
-		// }
-		c.Rotate.FileName = logPath + "/" + c.Rotate.FileName
-		c.Rotate.FileName = filepath.Clean(c.Rotate.FileName)
+		c.FileName = logPath + "/" + c.FileName
+		c.FileName = filepath.Clean(c.FileName)
 
-		lumLogger := newLumLogger(c.Rotate)
+		lumLogger := newLumLogger(c)
 		w := zapcore.AddSync(lumLogger)
 		core := zapcore.NewCore(enc, w, level)
 		logger := zap.New(core)
@@ -92,12 +84,14 @@ func initDefaultLogger() *zap.Logger {
 	procName := commandline.ProcName()
 	fileName := filepath.Clean(logPath + "/" + procName + ".log")
 
-	r := rotateConfig{
+	r := loggerConfig{
 		FileName:  fileName,
 		MaxSize:   20,
 		MaxAge:    7,
 		LocalTime: true,
 		Compress:  true,
+		Level:     "info",
+		Env:       "prod",
 	}
 	level := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	lumLogger := newLumLogger(r)

@@ -10,7 +10,7 @@ import (
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
-type rotateConfig struct {
+type loggerConfig struct {
 	// Filename is the file to write logs to.  Backup log files will be retained
 	// in the same directory.  It uses <processname>-lumberjack.log in
 	// os.TempDir() if empty.
@@ -40,12 +40,12 @@ type rotateConfig struct {
 	// Compress determines if the rotated log files should be compressed
 	// using gzip.
 	Compress bool `json:"compress" yaml:"compress"`
-}
 
-type loggerConfig struct {
-	Rotate rotateConfig `json:"rotate" yaml:"rotate"`
-	Level  string       `json:"level" yaml:"level"`
-	Env    string       `json:"env" yaml:"env"`
+	// Log Level. The default is to use Info
+	Level string `json:"level" yaml:"level"`
+
+	// Env, either prod or dev
+	Env string `json:"env" yaml:"env"`
 }
 
 type config map[string]loggerConfig
@@ -63,7 +63,7 @@ func loadConfig(fileName string) (conf config, err error) {
 	return
 }
 
-func newLumLogger(c rotateConfig) *lumberjack.Logger {
+func newLumLogger(c loggerConfig) *lumberjack.Logger {
 	return &lumberjack.Logger{
 		Filename:   c.FileName,
 		MaxSize:    c.MaxSize,

@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/hotmall/commandline"
@@ -64,11 +65,14 @@ func init() {
 		lumLogger := newLumLogger(c)
 		w := zapcore.AddSync(lumLogger)
 		core := zapcore.NewCore(enc, w, level)
-		logger := zap.New(core)
 		if n == "default" {
+			// stdout 与 stderr 由 default 接管
+			tee := zapcore.NewTee(core, newStdoutCore(enc), newStderrCore(enc))
+			logger := zap.New(tee, zap.AddCaller())
 			defaultLogger = logger
 			continue
 		}
+		logger := zap.New(core, zap.AddCaller())
 		if _, ok := loggers[n]; !ok {
 			loggers[n] = logger
 		}
@@ -77,6 +81,9 @@ func init() {
 	if defaultLogger == nil {
 		defaultLogger = initDefaultLogger()
 	}
+
+	// 重定向标准日志库输出日志到 defaultLogger
+	zap.RedirectStdLog(defaultLogger)
 }
 
 func initDefaultLogger() *zap.Logger {
@@ -96,10 +103,29 @@ func initDefaultLogger() *zap.Logger {
 	level := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	lumLogger := newLumLogger(r)
 	w := zapcore.AddSync(lumLogger)
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-		w,
-		level,
-	)
-	return zap.New(core)
+	enc := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	core := zapcore.NewCore(enc, w, level)
+	// 接管 stdout 与 stderr 的日志
+	tee := zapcore.NewTee(core, newStdoutCore(enc), newStderrCore(enc))
+	return zap.New(tee, zap.AddCaller())
+}
+
+func newStdoutCore(enc zapcore.Encoder) zapcore.Core {
+	// info level enabler
+	infoLevel := zap.LevelEnablerFunc(func(level zapcore.Level) bool {
+		return level == zapcore.InfoLevel
+	})
+	// write syncers
+	stdoutSyncer := zapcore.Lock(os.Stdout)
+	return zapcore.NewCore(enc, stdoutSyncer, infoLevel)
+}
+
+func newStderrCore(enc zapcore.Encoder) zapcore.Core {
+	// error and fatal level enabler
+	errorFatalLevel := zap.LevelEnablerFunc(func(level zapcore.Level) bool {
+		return level == zapcore.ErrorLevel || level == zapcore.FatalLevel
+	})
+	// write syncers
+	stderrSyncer := zapcore.Lock(os.Stderr)
+	return zapcore.NewCore(enc, stderrSyncer, errorFatalLevel)
 }

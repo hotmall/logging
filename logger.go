@@ -1,9 +1,10 @@
 package logging
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/hotmall/commandline"
 	"go.uber.org/zap"
@@ -11,8 +12,10 @@ import (
 )
 
 var (
+	once          sync.Once
 	defaultLogger *zap.Logger
 	loggers       = make(map[string]*zap.Logger)
+	m             sync.RWMutex
 )
 
 // Logger return the named zap.Logger instance, if no names return defaultLogger
@@ -20,29 +23,39 @@ func Logger(names ...string) *zap.Logger {
 	if len(names) == 0 {
 		return defaultLogger
 	}
-	name := names[0]
-	if logger, ok := loggers[name]; ok {
-		return logger
+	m.RLock()
+	defer m.RUnlock()
+	// 遍历 names，找到就返回
+	for _, name := range names {
+		if logger, ok := loggers[name]; ok {
+			return logger
+		}
 	}
 	return defaultLogger
 }
 
 func init() {
-	prefix := commandline.PrefixPath()
-	configFile := prefix + "/etc/conf/logging.json"
-	config, err := loadConfig(configFile)
+	once.Do(func() {
+		initLogger(commandline.PrefixPath())
+	})
+}
+
+func initLogger(prefix string) {
+	procName := commandline.ProcName
+	logPath := commandline.LogPath()
+	confile := confile(prefix)
+	config, err := loadConfig(confile)
 	if err != nil {
-		defaultLogger = initDefaultLogger()
+		defaultLogger = initDefaultLogger(logPath, procName)
 		return
 	}
 
-	logPath := commandline.LogPath()
 	for n, c := range config {
 		level := zap.NewAtomicLevel()
 		err = level.UnmarshalText([]byte(c.Level))
 		if err != nil {
 			// fail, not return, use InfoLevel
-			fmt.Printf("Unmarshal level(%s) fail, err = %s", c.Level, err.Error())
+			log.Printf("[logging.initLogger] Unmarshal level(%s) fail, err = %s", c.Level, err.Error())
 			level.SetLevel(zapcore.InfoLevel)
 		}
 
@@ -59,7 +72,8 @@ func init() {
 			enc = zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		}
 
-		c.FileName = logPath + "/" + c.FileName
+		// c.FileName = logPath + "/" + c.FileName
+		c.FileName = filepath.Join(logPath, c.FileName)
 		c.FileName = filepath.Clean(c.FileName)
 
 		lumLogger := newLumLogger(c)
@@ -73,24 +87,19 @@ func init() {
 			continue
 		}
 		logger := zap.New(core, zap.AddCaller())
-		if _, ok := loggers[n]; !ok {
-			loggers[n] = logger
-		}
+		addOne(n, logger)
 	}
 
 	if defaultLogger == nil {
-		defaultLogger = initDefaultLogger()
+		defaultLogger = initDefaultLogger(logPath, procName)
 	}
 
 	// 重定向标准日志库输出日志到 defaultLogger
 	zap.RedirectStdLog(defaultLogger)
 }
 
-func initDefaultLogger() *zap.Logger {
-	logPath := commandline.LogPath()
-	procName := commandline.ProcName()
-	fileName := filepath.Clean(logPath + "/" + procName + ".log")
-
+func initDefaultLogger(logPath, procName string) *zap.Logger {
+	fileName := filepath.Clean(filepath.Join(logPath, procName+".log"))
 	r := loggerConfig{
 		FileName:  fileName,
 		MaxSize:   20,
@@ -128,4 +137,12 @@ func newStderrCore(enc zapcore.Encoder) zapcore.Core {
 	// write syncers
 	stderrSyncer := zapcore.Lock(os.Stderr)
 	return zapcore.NewCore(enc, stderrSyncer, errorFatalLevel)
+}
+
+func addOne(name string, logger *zap.Logger) {
+	m.Lock()
+	defer m.Unlock()
+	if _, ok := loggers[name]; !ok {
+		loggers[name] = logger
+	}
 }

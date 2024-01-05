@@ -3,30 +3,26 @@ package logging
 import (
 	"testing"
 
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestLogger(t *testing.T) { TestingT(t) }
-
-type MySuite struct{}
-
-var _ = Suite(&MySuite{})
-
-func (s *MySuite) TestRLogger(c *C) {
-
+func TestRLogger(t *testing.T) {
+	assert := assert.New(t)
 	l1 := Logger("root")
-	c.Assert(l1, NotNil)
+	assert.NotNil(l1)
+
 	l2 := Logger("ROOT")
-	c.Assert(l2, NotNil)
+	assert.NotNil(l2)
 }
 
-func (s *MySuite) TestLogger(c *C) {
+func TestLogger(t *testing.T) {
+	assert := assert.New(t)
 	l1 := Logger("mylog")
-	c.Assert(l1, NotNil)
+	assert.NotNil(l1)
 
 	l2 := Logger("MYLOG")
-	c.Assert(l2, NotNil)
+	assert.NotNil(l2)
 
 	l3 := Logger("mylog1")
-	c.Assert(l3, NotNil)
+	assert.NotNil(l3)
 }

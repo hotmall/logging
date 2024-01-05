@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
@@ -51,7 +52,7 @@ type loggerConfig struct {
 type config map[string]loggerConfig
 
 func loadConfig(fileName string) (conf config, err error) {
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := os.ReadFile(fileName)
 	if err != nil {
 		return
 	}
@@ -79,7 +80,8 @@ var errUnmarshalNilLevel = errors.New("can't unmarshal a nil *Env")
 type Env int8
 
 const (
-	ProdEnv Env = iota - 1
+	UnknowEnv Env = iota - 1
+	ProdEnv
 	DevEnv
 )
 
@@ -91,7 +93,7 @@ func (e Env) String() string {
 	case DevEnv:
 		return "dev"
 	default:
-		return fmt.Sprintf("Env(%d)", e)
+		return fmt.Sprintf("unrecognized env: %d", e)
 	}
 }
 
@@ -99,17 +101,23 @@ func (e *Env) UnmarshalText(text []byte) error {
 	if e == nil {
 		return errUnmarshalNilLevel
 	}
-	if !e.unmarshalText(text) && !e.unmarshalText(bytes.ToLower(text)) {
-		return fmt.Errorf("unrecognized env: %q", text)
+	if !e.unmarshalText(text) {
+		return fmt.Errorf("unrecognized env: %s", string(text))
 	}
 	return nil
 }
 
 func (e *Env) unmarshalText(text []byte) bool {
-	switch string(text) {
-	case "prod", "PROD", "": // make the zero value useful
+	var env string
+	if len(text) == 0 {
+		env = "prod"
+	} else {
+		env = string(bytes.ToLower(text))
+	}
+	switch env {
+	case "prod": // make the zero value useful
 		*e = ProdEnv
-	case "dev", "DEV":
+	case "dev":
 		*e = DevEnv
 	default:
 		return false
@@ -125,4 +133,8 @@ func (e *Env) Set(s string) error {
 // Get gets the level for the flag.Getter interface.
 func (e *Env) Get() interface{} {
 	return *e
+}
+
+func confile(prefix string) string {
+	return filepath.Join(prefix, "etc", "conf", "logging.json")
 }

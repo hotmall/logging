@@ -2,8 +2,8 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/hotmall/commandline v1.1.0 h1:8X26CKsQIVtWD2g4McRO8BDx+Eo15PYO5qe2hr1vG2s=
-github.com/hotmall/commandline v1.1.0/go.mod h1:pf/HzMqmjoPH0Roy/MY4SdUCOirihz2HhQmYgapNSV0=
+github.com/hotmall/commandline v1.2.0 h1:edCuDFvmxwcz18/GceYfGd2u+MYzomKwe+/fONHyvW8=
+github.com/hotmall/commandline v1.2.0/go.mod h1:EcGE1Selv9TReaU7IbSM8Wr1sG93gwmVMc2dNDJRUFM=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=

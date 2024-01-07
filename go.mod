@@ -1,9 +1,11 @@
 module github.com/hotmall/logging
 
-go 1.19
+go 1.21
+
+toolchain go1.21.5
 
 require (
-	github.com/hotmall/commandline v1.1.0
+	github.com/hotmall/commandline v1.2.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.9.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0-20170531160350-a96e63847dc3

@@ -3,7 +3,7 @@ module github.com/hotmall/logging
 go 1.21
 
 require (
-	github.com/hotmall/commandline v1.2.4
+	github.com/hotmall/commandline v1.5.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
